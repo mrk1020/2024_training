@@ -17,7 +17,7 @@ import java.util.TimerTask;
  */
 public class MetricCollector {
 
-    private static final String SERVER_URL = "";
+    private static final String SERVER_URL = "http://server:8080/api/metric/upload";
 
     /**
      * 指标的采集周期

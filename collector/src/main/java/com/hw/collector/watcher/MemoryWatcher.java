@@ -14,8 +14,8 @@ public class MemoryWatcher {
         BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/meminfo"));
         long memTotal = 0;
         long memAvailable = 0;
-        String line = bufferedReader.readLine();
-        while (line != null) {
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
             if (line.startsWith("MemTotal:")) {
                 memTotal = parseMemValue(line);
             } else if (line.startsWith("MemAvailable:")) {
