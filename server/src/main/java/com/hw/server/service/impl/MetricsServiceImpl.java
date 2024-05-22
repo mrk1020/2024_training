@@ -50,6 +50,7 @@ public class MetricsServiceImpl extends ServiceImpl<MetricsMapper, Metrics> impl
 
     @Override
     public Result<?> queryMetrics(String endpoint, String metric, Long startTs, Long endTs) {
+        // TODO: 此处暂时是直接访问数据库，正确流程应该是先访问缓存，但是缓存中数据量太少，感觉请求还是会大量打到数据库
         List<Metrics> metricsList = this.list(new LambdaQueryWrapper<Metrics>()
                 .eq(Metrics::getEndpoint, endpoint)
                 .eq(Metrics::getMetric, metric)
