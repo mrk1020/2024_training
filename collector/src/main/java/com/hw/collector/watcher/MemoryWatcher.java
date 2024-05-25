@@ -29,7 +29,7 @@ public class MemoryWatcher {
     }
 
     private long parseMemValue(String line) {
-        String[] tokens = line.split(" ");
+        String[] tokens = line.split("\\s+");
         return Long.parseLong(tokens[1]) * 1024;
     }
 }

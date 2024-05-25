@@ -1,7 +1,9 @@
-package com.hw.collector.watcher;
+package com.hw.collector;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.hw.collector.watcher.CPUWatcher;
+import com.hw.collector.watcher.MemoryWatcher;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,7 +19,10 @@ import java.util.TimerTask;
  */
 public class MetricCollector {
 
-    private static final String SERVER_URL = "http://server:8080/api/metric/upload";
+    /**
+     * 定时请求上传接口
+     */
+    private static final String SERVER_URL = "http://192.168.80.128:8080/api/metric/upload";
 
     /**
      * 指标的采集周期
@@ -67,6 +72,7 @@ public class MetricCollector {
         metrics.add(memMetric);
 
         sendMetrics(metrics);
+        System.out.println("cpu usage: " + cpuUsage + " memory usage: " + memoryUsage);
     }
 
     private static void sendMetrics(JSONArray metrics) throws IOException {

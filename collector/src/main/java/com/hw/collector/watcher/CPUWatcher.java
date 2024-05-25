@@ -37,9 +37,8 @@ public class CPUWatcher {
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/stat"));
             String line = bufferedReader.readLine();
-            String[] tokens = line.split(" ");
+            String[] tokens = line.split("\\s+");
             if (line != null && line.startsWith("cpu ")) {
-
                 long[] cpuTimes = new long[tokens.length - 1];
                 for (int i = 1; i < tokens.length; i++) {
                     cpuTimes[i - 1] = Long.parseLong(tokens[i]);
