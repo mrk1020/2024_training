@@ -25,7 +25,7 @@ public class MemoryWatcher {
                 break;
             }
         }
-        return 1.0 - (memAvailable / (double) memTotal);
+        return (1.0 - (memAvailable / (double) memTotal)) * 100;
     }
 
     private long parseMemValue(String line) {

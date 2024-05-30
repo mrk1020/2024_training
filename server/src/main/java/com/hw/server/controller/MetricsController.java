@@ -30,10 +30,10 @@ public class MetricsController {
     }
 
     @GetMapping("/query")
-    public Result queryMetrics(@RequestParam String endpoint,
-                               @RequestParam String metric,
-                               @RequestParam Long startTs,
-                               @RequestParam Long endTs) {
+    public Result queryMetrics(@RequestParam("endpoint") String endpoint,
+                               @RequestParam(value = "metric", required = false) String metric,
+                               @RequestParam("start_ts") Long startTs,
+                               @RequestParam("end_ts") Long endTs) {
         return metricsService.queryMetrics(endpoint, metric, startTs, endTs);
     }
 

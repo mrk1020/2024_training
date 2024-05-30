@@ -17,3 +17,10 @@ spring:
         max-idle: 10
         min-idle: 1
         time-between-eviction-runs: 10s
+
+mybatis-plus:
+  type-aliases-package: com.hw.server.domain     # 别名扫描包
+
+logging:
+  level:
+    com.hw.server: debug

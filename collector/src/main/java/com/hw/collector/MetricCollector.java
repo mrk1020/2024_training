@@ -7,9 +7,9 @@ import com.hw.collector.watcher.MemoryWatcher;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
+import java.net.*;
+import java.text.NumberFormat;
+import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,7 +22,7 @@ public class MetricCollector {
     /**
      * 定时请求上传接口
      */
-    private static final String SERVER_URL = "http://192.168.80.128:8080/api/metric/upload";
+    private static final String SERVER_URL = "http://192.168.80.1:8080/api/metric/upload";
 
     /**
      * 指标的采集周期
@@ -46,11 +46,12 @@ public class MetricCollector {
     private static void collectAndSendMetrics() throws IOException {
         CPUWatcher cpuWatcher = new CPUWatcher();
         MemoryWatcher memoryWatcher = new MemoryWatcher();
-        double cpuUsage = cpuWatcher.getCpuUsage();
-        double memoryUsage = memoryWatcher.getMemoryUsage();
+        double cpuUsage = formatUsage(cpuWatcher.getCpuUsage());
+        double memoryUsage = formatUsage(memoryWatcher.getMemoryUsage());
 
-        InetAddress inetAddress = InetAddress.getLocalHost();
-        String ip = inetAddress.getHostAddress();
+        /*InetAddress inetAddress = InetAddress.getLocalHost();
+        String ip = inetAddress.getHostAddress();*/
+        String ip = getIpAddress();
 
         JSONArray metrics = new JSONArray();
 
@@ -91,5 +92,36 @@ public class MetricCollector {
         }
 
         connection.disconnect();
+    }
+
+    private static double formatUsage(double number) {
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        numberFormat.setMaximumFractionDigits(1);
+        String str = numberFormat.format(number);
+        return Double.parseDouble(str);
+    }
+
+    private static String getIpAddress() {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            InetAddress ip = null;
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = networkInterfaces.nextElement();
+                if (networkInterface.isLoopback() || networkInterface.isVirtual() || !networkInterface.isUp()) {
+                    continue;
+                } else {
+                    Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+                    while (inetAddresses.hasMoreElements()) {
+                        ip = inetAddresses.nextElement();
+                        if (ip != null && ip instanceof Inet4Address) {
+                            return ip.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            throw new RuntimeException("Unable to get IP address!!!");
+        }
+        return "my-computer";
     }
 }

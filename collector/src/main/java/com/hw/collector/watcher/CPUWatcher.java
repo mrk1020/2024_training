@@ -1,8 +1,6 @@
 package com.hw.collector.watcher;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * @author mrk
@@ -10,22 +8,23 @@ import java.io.IOException;
  */
 public class CPUWatcher {
 
-    private long[] lastCpuTimes;
+    private final String STAT_FILE_HEADER = "cpu  ";
+
+    private long previousIdleTime = 0, previousTotalTime = 0;
 
     public double getCpuUsage() throws IOException {
-        long[] cpuTimes = getCpuTimes();
+        String[] cpuTimes = getCpuTimes();
 
-        if (lastCpuTimes == null) {
-            lastCpuTimes = cpuTimes;
-            return 0.;
-        }
+        long idleTime = Long.parseUnsignedLong(cpuTimes[3]);
+        long totalTime = getTotalTime(cpuTimes);
 
-        long idleTime = cpuTimes[3] - lastCpuTimes[3];
-        long totalTime = getTotalTime(cpuTimes) - getTotalTime(lastCpuTimes);
+        long idleTimeDelta = idleTime - previousIdleTime;
+        long totalTimeDelta = totalTime - previousTotalTime;
 
-        lastCpuTimes = cpuTimes;
+        previousIdleTime = idleTime;
+        previousTotalTime = totalTime;
 
-        return 1.0 - (idleTime / (double) totalTime);
+        return (1.0 - idleTimeDelta / (double) totalTimeDelta) * 100;
     }
 
     /**
@@ -33,28 +32,23 @@ public class CPUWatcher {
      * @return
      * @throws IOException
      */
-    private long[] getCpuTimes() throws IOException {
+    private String[] getCpuTimes() throws IOException {
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/stat"));
-            String line = bufferedReader.readLine();
-            String[] tokens = line.split("\\s+");
-            if (line != null && line.startsWith("cpu ")) {
-                long[] cpuTimes = new long[tokens.length - 1];
-                for (int i = 1; i < tokens.length; i++) {
-                    cpuTimes[i - 1] = Long.parseLong(tokens[i]);
-                }
-                return cpuTimes;
-            }
-            return new long[tokens.length - 1];
+            RandomAccessFile statPointer = new RandomAccessFile(
+                    new File("/proc/stat"), "r");
+
+            return statPointer.readLine()
+                    .substring(STAT_FILE_HEADER.length())
+                    .split("\\s+");
         } catch (IOException e) {
             throw new IOException("Unable to read /proc/stat!!!");
         }
     }
 
-    private long getTotalTime(long[] cpuTimes) {
+    private long getTotalTime(String[] cpuTimes) {
         long totalTime = 0;
-        for (long cpuTime : cpuTimes) {
-            totalTime += cpuTime;
+        for (String cpuTime : cpuTimes) {
+            totalTime += Long.parseUnsignedLong(cpuTime);
         }
         return totalTime;
     }
